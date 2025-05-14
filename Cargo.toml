@@ -1,0 +1,19 @@
+[package]
+name = "hive-discovery"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+mdns-sd = "0.13"                                       # mDNS 服务发现
+tokio = { version = "1", features = ["full"] }         # 异步运行时
+serde = { version = "1.0.130", features = ["derive"] } # 序列化/反序列化
+serde_json = "1.0.140"                                 # JSON 处理
+thiserror = "2.0.12"                                   # 错误处理
+log = "0.4.26"                                         # 日志接口
+
+
+[dev-dependencies]
+env_logger = "0.11"
