@@ -14,6 +14,7 @@ Hive Discovery is a lightweight service discovery library written in Rust, provi
 ### Basic Usage Example
 
 ```rust
+use std::collections::HashMap;
 use hive_discovery::{
     DiscoveryEvent, DiscoveryImplementation, LocalServiceConfig, create_discovery_service
 };
@@ -21,14 +22,16 @@ use hive_discovery::{
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a discovery service instance
+    let mut properties = HashMap::new();
+    properties.insert("device_id".to_string(), "my-device-123".to_string());
+    properties.insert("device_name".to_string(), "My Device".to_string());
+    properties.insert("version".to_string(), "1.0.0".to_string());
+    
     let config = LocalServiceConfig {
-        device_id: "my-device-123".to_string(),
-        device_name: "My Device".to_string(),
-        version: "1.0.0".to_string(),
         service_type: "_my-service._tcp.local.".to_string(),
         port: 8080,
         instance_name: "MyServiceInstance".to_string(),
-        properties: None,
+        properties: Some(properties),
         service_ttl: 60,
         mdns_response_delay_ms: (20, 120),
         refresh_interval: 30,
@@ -77,13 +80,14 @@ Check the [examples](./examples) directory for more examples.
 
 The `LocalServiceConfig` struct provides rich configuration options:
 
-- `device_id`: Unique identifier for the device
-- `device_name`: Friendly name for the device
-- `version`: Software version
 - `service_type`: Service type, e.g. "_my-service._tcp.local."
 - `port`: Port the service listens on
 - `instance_name`: Service instance name
-- `properties`: Service properties (optional, key-value pairs)
+- `properties`: Service properties (key-value pairs, must include `device_id`)
+  - `device_id`: Unique identifier for the device (required)
+  - `device_name`: Friendly name for the device (recommended)
+  - `version`: Software version (recommended)
+  - Other custom properties...
 - `service_ttl`: Service Time To Live (seconds)
 - `mdns_response_delay_ms`: mDNS response delay range, for network congestion control
 - `refresh_interval`: Discovery refresh interval

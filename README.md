@@ -17,6 +17,7 @@ Hive Discovery是一个用Rust编写的轻量级服务发现库，提供跨平�
 ### 基本使用示例
 
 ```rust
+use std::collections::HashMap;
 use hive_discovery::{
     DiscoveryEvent, DiscoveryImplementation, LocalServiceConfig, create_discovery_service
 };
@@ -24,14 +25,16 @@ use hive_discovery::{
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 创建服务发现实例
+    let mut properties = HashMap::new();
+    properties.insert("device_id".to_string(), "my-device-123".to_string());
+    properties.insert("device_name".to_string(), "My Device".to_string());
+    properties.insert("version".to_string(), "1.0.0".to_string());
+    
     let config = LocalServiceConfig {
-        device_id: "my-device-123".to_string(),
-        device_name: "My Device".to_string(),
-        version: "1.0.0".to_string(),
         service_type: "_my-service._tcp.local.".to_string(),
         port: 8080,
         instance_name: "MyServiceInstance".to_string(),
-        properties: None,
+        properties: Some(properties),
         service_ttl: 60,
         mdns_response_delay_ms: (20, 120),
         refresh_interval: 30,
@@ -80,13 +83,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 `LocalServiceConfig` 结构体提供了丰富的配置选项：
 
-- `device_id`: 设备的唯一标识符
-- `device_name`: 设备的友好名称
-- `version`: 软件版本
 - `service_type`: 服务类型，例如 "_my-service._tcp.local."
 - `port`: 服务监听端口
 - `instance_name`: 服务实例名称
-- `properties`: 服务属性（可选，键值对形式）
+- `properties`: 服务属性（键值对形式，必须包含 `device_id`）
+  - `device_id`: 设备的唯一标识符（必填）
+  - `device_name`: 设备的友好名称（推荐）
+  - `version`: 软件版本（推荐）
+  - 其他自定义属性...
 - `service_ttl`: 服务生存时间（秒）
 - `mdns_response_delay_ms`: mDNS响应延迟范围，用于网络拥塞控制
 - `refresh_interval`: 发现刷新间隔
