@@ -52,14 +52,43 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             match event {
                 DiscoveryEvent::ServiceFound(details) => {
                     let name = details.instance_name.clone();
-                    discovered_services.insert(name.clone(), details);
+                    discovered_services.insert(name.clone(), details.clone());
+
+                    // 详细记录发现的设备信息
                     info!("服务已发现/更新: {}", name);
+                    info!("  - 服务类型: {}", details.service_type);
+                    info!("  - 主机地址: {:?}", details.host_name);
+                    info!("  - IP地址: {:?}", details.addresses);
+                    info!("  - 端口: {}", details.port);
+
+                    let props = &details.properties;
+                    if !props.is_empty() {
+                        info!("  - 属性信息:");
+                        for (key, value) in props {
+                            info!("    * {}: {}", key, value);
+                        }
+                    } else {
+                        info!("  - 无属性信息");
+                    }
+
+                    info!("  - 上次更新时间: {:?}", details.last_seen);
                 }
                 DiscoveryEvent::ServiceLost(name) => {
-                    discovered_services.remove(&name);
-                    info!("服务已失去: {}", name);
+                    if let Some(lost_service) = discovered_services.remove(&name) {
+                        info!("服务已失去: {}", name);
+                        info!("  - 服务类型: {}", lost_service.service_type);
+                        info!("  - 主机地址: {:?}", lost_service.host_name);
+                        info!("  - 上次可见: {:?}", lost_service.last_seen);
+                    } else {
+                        info!("服务已失去: {} (无详细信息)", name);
+                    }
                 }
-                _ => {}
+                DiscoveryEvent::DiscoveryStarted => {
+                    info!("服务发现已启动");
+                }
+                DiscoveryEvent::DiscoveryStopped => {
+                    info!("服务发现已停止");
+                }
             }
 
             // 发送服务数量统计

@@ -177,7 +177,6 @@ impl MdnsDiscoveryService {
         sender: &broadcast::Sender<DiscoveryEvent>,
         state: &Arc<RwLock<MdnsServiceState>>,
         service_type: &str,
-        local_device_id: &str,
     ) {
         match event {
             ServiceEvent::ServiceFound(type_domain, fullname) => {
@@ -223,17 +222,6 @@ impl MdnsDiscoveryService {
                     .iter()
                     .map(|prop| (prop.key().to_string(), prop.val_str().to_string()))
                     .collect::<BTreeMap<_, _>>();
-
-                // Filter out self-discovery based on device_id
-                if let Some(remote_device_id) = properties.get("device_id") {
-                    if remote_device_id == local_device_id {
-                        debug!(
-                            "Ignoring self-discovery for service {} (device_id: {})",
-                            id, local_device_id
-                        );
-                        return;
-                    }
-                }
 
                 // Check if this service instance name is in the general filter list.
                 let should_filter = {
@@ -360,15 +348,26 @@ impl DiscoveryService for MdnsDiscoveryService {
             final_instance_name, final_service_type
         );
 
-        // Properties are now expected to contain device_id, device_name, version directly
-        let service_properties = self.config.properties.clone().unwrap_or_default();
+        // 保存本机实例名并添加到过滤列表
+        {
+            let mut own_name_guard = self.own_instance_name.write().unwrap();
+            *own_name_guard = Some(final_instance_name.clone());
 
-        // Ensure device_id is present in the properties being advertised
-        if !service_properties.contains_key("device_id") {
-            return Err(HiveDiscoError::ConfigError(
-                "device_id is missing in properties for service advertisement.".into(),
-            ));
+            let mut state_guard = self.state.write().unwrap();
+            state_guard.filter.insert(final_instance_name.clone());
+
+            // 添加带有服务类型的完整名称（可能在事件中使用）
+            let fullname = format!("{}.{}", final_instance_name, final_service_type);
+            state_guard.filter.insert(fullname.clone());
+
+            debug!(
+                "Added own instance name '{}' to filter list",
+                final_instance_name
+            );
         }
+
+        // Properties are now expected to contain device_name, version directly
+        let service_properties = self.config.properties.clone().unwrap_or_default();
 
         let service_info = ServiceInfo::new(
             &final_service_type,
@@ -426,22 +425,7 @@ impl DiscoveryService for MdnsDiscoveryService {
 
         let service_type = self.config.service_type.clone();
 
-        // Get local_device_id from properties for self-discovery filtering
-        let local_device_id = self
-            .config
-            .properties
-            .as_ref()
-            .and_then(|props| props.get("device_id").cloned())
-            .ok_or_else(|| {
-                HiveDiscoError::ConfigError(
-                    "device_id is missing in properties, required for starting discovery.".into(),
-                )
-            })?;
-
-        info!(
-            "Starting service discovery for type: {} (Local Device ID: {})",
-            service_type, local_device_id
-        );
+        info!("Starting service discovery for type: {}", service_type);
 
         self.start_cleanup_task()?;
 
@@ -485,7 +469,6 @@ impl DiscoveryService for MdnsDiscoveryService {
                     &sender,
                     &state,
                     &service_type,
-                    &local_device_id,
                 );
             }
 
@@ -615,6 +598,12 @@ impl DiscoveryService for MdnsDiscoveryService {
                 "Error occurred while stopping service discovery during shutdown: {}",
                 e
             );
+        }
+
+        // 清除本机实例名记录
+        {
+            let mut own_name_guard = self.own_instance_name.write().unwrap();
+            *own_name_guard = None;
         }
 
         {
