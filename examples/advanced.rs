@@ -18,20 +18,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (tx, mut rx) = mpsc::channel::<String>(32);
 
     // 创建服务
+    let mut props = HashMap::new();
+    props.insert("device_id".to_string(), "advanced-device2".to_string());
+    props.insert("device_name".to_string(), "示例设备".to_string());
+    props.insert("version".to_string(), "1.0.0".to_string());
+    props.insert("mode".to_string(), "advanced".to_string());
+    props.insert("features".to_string(), "refresh,filter".to_string());
+
     let config = LocalServiceConfig {
-        device_id: "advanced-device".to_string(),
-        device_name: "示例设备".to_string(),
-        version: "1.0.0".to_string(),
         service_type: "_hive-advanced._tcp.local.".to_string(),
         port: 9000,
-        instance_name: "HiveAdvancedExample".to_string(),
-        properties: Some({
-            let mut props = HashMap::new();
-            props.insert("mode".to_string(), "advanced".to_string());
-            props.insert("features".to_string(), "refresh,filter".to_string());
-            props
-        }),
-        service_ttl: 30,
+        instance_name: "HiveAdvancedExample2".to_string(),
+        properties: Some(props),
+        service_ttl: 300,
         mdns_response_delay_ms: (10, 100),
         refresh_interval: 15,
     };

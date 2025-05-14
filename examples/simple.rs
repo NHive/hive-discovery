@@ -83,14 +83,14 @@ fn create_provider_service()
 
     // 创建服务属性
     let mut properties = HashMap::new();
+    properties.insert("device_id".to_string(), "provider-123456".to_string());
+    properties.insert("device_name".to_string(), "示例提供者".to_string());
+    properties.insert("version".to_string(), "1.0.0".to_string());
     properties.insert("description".to_string(), "示例服务提供者".to_string());
     properties.insert("capability".to_string(), "file-sharing".to_string());
 
     // 配置服务
     let config = LocalServiceConfig {
-        device_id: "provider-123456".to_string(),
-        device_name: "示例提供者".to_string(),
-        version: "1.0.0".to_string(),
         service_type: "_hive-example._tcp.local.".to_string(),
         port: 8080,
         instance_name: "HiveExampleProvider".to_string(),
@@ -112,15 +112,17 @@ fn create_discoverer_config_only()
 -> Result<Arc<dyn hive_discovery::DiscoveryService>, Box<dyn std::error::Error>> {
     info!("创建服务发现者实例 (仅配置)...");
 
+    let mut properties = HashMap::new();
+    properties.insert("device_id".to_string(), "discoverer-654321".to_string());
+    properties.insert("device_name".to_string(), "示例发现者".to_string());
+    properties.insert("version".to_string(), "1.0.0".to_string());
+
     // 配置服务发现者
     let config = LocalServiceConfig {
-        device_id: "discoverer-654321".to_string(),
-        device_name: "示例发现者".to_string(),
-        version: "1.0.0".to_string(),
         service_type: "_hive-example._tcp.local.".to_string(),
         port: 8081, // 发现者也需要一个端口进行mDNS通信，即使它不提供用户服务
         instance_name: "HiveExampleDiscoverer".to_string(),
-        properties: None,
+        properties: Some(properties),
         service_ttl: 60,
         mdns_response_delay_ms: (20, 120),
         refresh_interval: 30,

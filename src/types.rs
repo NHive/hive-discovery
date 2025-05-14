@@ -63,17 +63,6 @@ pub struct DiscoveryServiceDetails {
 /// Configuration for registering a local service and for discovery behavior.
 #[derive(Clone, Debug)]
 pub struct LocalServiceConfig {
-    /// A unique identifier for the device publishing the service.
-    /// This ID should uniquely identify the device on the network.
-    pub device_id: String,
-
-    /// A user-friendly name for the device.
-    /// This name might be displayed to users on other devices.
-    pub device_name: String,
-
-    /// The version string of the software or service being advertised.
-    pub version: String,
-
     /// The type of service to be broadcast and discovered.
     /// Example: `"_myapp-filetransfer._tcp.local."`.
     pub service_type: String,
