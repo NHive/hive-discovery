@@ -83,10 +83,7 @@ The `LocalServiceConfig` struct provides rich configuration options:
 - `service_type`: Service type, e.g. "_my-service._tcp.local."
 - `port`: Port the service listens on
 - `instance_name`: Service instance name
-- `properties`: Service properties (key-value pairs, must include `device_id`)
-  - `device_id`: Unique identifier for the device (required)
-  - `device_name`: Friendly name for the device (recommended)
-  - `version`: Software version (recommended)
+- `properties`: Service properties (key-value pairs)
   - Other custom properties...
 - `service_ttl`: Service Time To Live (seconds)
 - `mdns_response_delay_ms`: mDNS response delay range, for network congestion control

@@ -86,10 +86,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 - `service_type`: 服务类型，例如 "_my-service._tcp.local."
 - `port`: 服务监听端口
 - `instance_name`: 服务实例名称
-- `properties`: 服务属性（键值对形式，必须包含 `device_id`）
-  - `device_id`: 设备的唯一标识符（必填）
-  - `device_name`: 设备的友好名称（推荐）
-  - `version`: 软件版本（推荐）
+- `properties`: 服务属性（键值对形式）
   - 其他自定义属性...
 - `service_ttl`: 服务生存时间（秒）
 - `mdns_response_delay_ms`: mDNS响应延迟范围，用于网络拥塞控制
