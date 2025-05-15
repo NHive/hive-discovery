@@ -6,7 +6,7 @@ authors = ["ChenZibo <qw.54@163.com>"]
 readme = "README_EN.md"
 repository = "https://github.com/zibo-chen/Selectic"
 license = "Apache-2.0"
-dependencies = "Hive Discovery is a lightweight service discovery library written in Rust, providing cross-platform network service discovery functionality with support for mDNS/DNS-SD protocols."
+description = "Hive Discovery is a lightweight service discovery library written in Rust, providing cross-platform network service discovery functionality with support for mDNS/DNS-SD protocols."
 
 [lib]
 crate-type = ["rlib"]
